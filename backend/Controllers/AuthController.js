@@ -4,10 +4,9 @@ const bcrypt = require("bcryptjs");
 
 module.exports.Login = async (req, res) => {
   try {
+    // req.body is already validated & sanitized by Joi middleware
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.json({ message: "All fields are required", success: false });
-    }
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.json({
@@ -42,10 +41,9 @@ module.exports.Login = async (req, res) => {
 
 module.exports.Signup = async (req, res) => {
   try {
+    // req.body is already validated & sanitized by Joi middleware
     const { email, password, username } = req.body;
-    if (!email || !password || !username) {
-      return res.json({ message: "All fields are required", success: false });
-    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ message: "User already exists", success: false });

@@ -4,26 +4,31 @@ TradeX is a modern, full-stack stock trading platform that allows users to manag
 
 ## 🚀 Features
 
-- **Real-Time Market Data**: Integration with Yahoo Finance (`yahoo-finance2`) to fetch live stock quotes, market indices (NIFTY 50, SENSEX), and calculate dynamic Profit & Loss (P&L).
+- **Real-Time Market Data via WebSockets**: Live stock prices and indices (NIFTY 50, SENSEX) pushed to the dashboard in real-time using **Socket.io**, eliminating the need for polling.
 - **Secure Authentication**: JWT-based authentication system with secure HTTP-only cookies and bcrypt password hashing.
+- **Request Validation**: All API inputs validated using **Joi** schemas — ensuring data integrity for signups, logins, and order placement.
 - **Dynamic Dashboard**:
-  - **Watchlist**: Search and add live stocks to your watchlist.
+  - **Watchlist**: Search and add live stocks to your watchlist with real-time price updates.
+  - **Buy & Sell**: Execute trades from the watchlist or directly from the Holdings page with live price validation and holding quantity checks.
   - **Holdings & Positions**: Automatically tracks your investments and calculates real-time margins and P&L based on Live Traded Prices (LTP).
-  - **Order Execution**: Buy and sell stocks instantly with live margin validation.
+  - **Funds**: Dynamic margin and balance calculations based on your actual portfolio.
 - **Modern UI/UX**: Responsive and sleek React-based user interfaces for both the main landing page and the trading dashboard.
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **React.js** (Frontend Landing Page & Trading Dashboard)
+- **Socket.io Client** for real-time WebSocket data
 - **React Router** for seamless navigation
 - **Axios** for API requests
 - **Chart.js** for visual portfolio analytics
 
 ### Backend
 - **Node.js & Express.js**
+- **Socket.io** for real-time market data broadcasting
 - **MongoDB & Mongoose** (Database & User-scoped Schemas)
 - **yahoo-finance2** (Live Stock Market API)
+- **Joi** for request validation
 - **JSON Web Tokens (JWT)** for Authentication
 
 ## 📂 Project Structure
@@ -84,6 +89,6 @@ npm start
 2. Visit `http://localhost:3000` and click on **Sign up for free** to create an account.
 3. Once logged in, click **Dashboard** in the navigation bar.
 4. Search for an NSE/BSE stock (e.g., `RELIANCE.NS`, `TCS.NS`) and add it to your watchlist.
-5. Click **Buy** to execute a trade and watch your **Holdings** dynamically update with live market prices!
-
-
+5. Hover over a stock and click **Buy** to purchase shares at live market price.
+6. Navigate to the **Holdings** page to see your portfolio with real-time P&L.
+7. Click the **Sell** button on any holding to sell shares — or use the Sell button in the watchlist.

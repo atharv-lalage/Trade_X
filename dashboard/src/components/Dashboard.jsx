@@ -15,17 +15,17 @@ const Dashboard = ({ username }) => {
     <div className="dashboard-container">
       <GeneralContextProvider>
         <WatchList />
+        <div className="content">
+          <Routes>
+            <Route exact path="/" element={<Summary username={username} />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/holdings" element={<Holdings />} />
+            <Route path="/positions" element={<Positions />} />
+            <Route path="/funds" element={<Funds />} />
+            <Route path="/apps" element={<Apps />} />
+          </Routes>
+        </div>
       </GeneralContextProvider>
-      <div className="content">
-        <Routes>
-          <Route exact path="/" element={<Summary username={username} />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/holdings" element={<Holdings />} />
-          <Route path="/positions" element={<Positions />} />
-          <Route path="/funds" element={<Funds />} />
-          <Route path="/apps" element={<Apps />} />
-        </Routes>
-      </div>
     </div>
   );
 };

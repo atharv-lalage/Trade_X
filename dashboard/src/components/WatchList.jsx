@@ -8,6 +8,7 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 import { getQuotes, searchStocks, DEFAULT_WATCHLIST } from "../services/stockApi";
+import { socket } from "./TopBar";
 import { DoughnutChart } from "./DoughnutChart";
 
 const WatchList = () => {
@@ -21,7 +22,7 @@ const WatchList = () => {
     return saved ? JSON.parse(saved) : DEFAULT_WATCHLIST;
   });
 
-  // Fetch stock data for watchlist
+  // Fetch stock data for initial load (HTTP fallback)
   const fetchWatchlistData = useCallback(async () => {
     if (watchlistSymbols.length === 0) {
       setStocks([]);
@@ -38,12 +39,30 @@ const WatchList = () => {
     }
   }, [watchlistSymbols]);
 
+  // Initial HTTP fetch + Socket.io real-time updates
   useEffect(() => {
     fetchWatchlistData();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchWatchlistData, 30000);
-    return () => clearInterval(interval);
-  }, [fetchWatchlistData]);
+
+    // Listen for real-time stock price updates via WebSocket
+    const handleStocksUpdate = (liveStocks) => {
+      setStocks((prevStocks) => {
+        // Merge live data into the current watchlist
+        const updatedStocks = watchlistSymbols.map((sym) => {
+          const liveMatch = liveStocks.find((s) => s.symbol === sym);
+          const prevMatch = prevStocks.find((s) => s.symbol === sym);
+          return liveMatch || prevMatch || { symbol: sym, name: sym, price: 0 };
+        }).filter((s) => s.price !== undefined);
+        return updatedStocks.length > 0 ? updatedStocks : prevStocks;
+      });
+      setLoading(false);
+    };
+
+    socket.on("stocksUpdate", handleStocksUpdate);
+
+    return () => {
+      socket.off("stocksUpdate", handleStocksUpdate);
+    };
+  }, [fetchWatchlistData, watchlistSymbols]);
 
   // Save watchlist to localStorage
   useEffect(() => {
@@ -262,6 +281,10 @@ const WatchListActions = ({ uid, onRemove }) => {
     generalContext.openBuyWindow(uid);
   };
 
+  const handleSellClick = () => {
+    generalContext.openSellWindow(uid);
+  };
+
   return (
     <span className="actions">
       <span>
@@ -279,6 +302,7 @@ const WatchListActions = ({ uid, onRemove }) => {
           placement="top"
           arrow
           TransitionComponent={Grow}
+          onClick={handleSellClick}
         >
           <button className="sell">Sell</button>
         </Tooltip>

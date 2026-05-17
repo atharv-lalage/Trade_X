@@ -1,0 +1,32 @@
+#sell-window .sell-header {
+  background: #e74c3c;
+}
+
+#sell-window .holding-info {
+  font-size: 0.85rem;
+  color: #555;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+}
+
+#sell-window .holding-info strong {
+  color: #333;
+}
+
+#sell-window .holding-info.no-holding {
+  color: #e74c3c;
+}
+
+.btn-orange {
+  background: #e74c3c;
+}
+
+.btn-orange:hover {
+  background: #f06a5e;
+}
+
+.btn-orange:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

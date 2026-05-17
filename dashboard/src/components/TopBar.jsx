@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Menu from "./Menu";
-import { getIndices } from "../services/stockApi";
+import { io } from "socket.io-client";
+
+// Create a single socket connection (shared across the app)
+const socket = io("http://localhost:3002", {
+  withCredentials: true,
+  transports: ["websocket", "polling"],
+});
+
+export { socket }; // export for use in other components
 
 const TopBar = () => {
   const [indices, setIndices] = useState({
@@ -8,24 +16,32 @@ const TopBar = () => {
     sensex: { name: "SENSEX", price: 0, change: 0, changePercent: 0, isDown: false },
   });
   const [loading, setLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const fetchIndices = async () => {
-      try {
-        const data = await getIndices();
-        setIndices(data);
-      } catch (error) {
-        console.error("Failed to fetch indices:", error);
-      } finally {
-        setLoading(false);
-      }
+    // Listen for real-time index updates from the server
+    socket.on("indicesUpdate", (data) => {
+      setIndices(data);
+      setLoading(false);
+      setConnected(true);
+    });
+
+    socket.on("connect", () => {
+      console.log("[Socket.io] Connected to server:", socket.id);
+      setConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("[Socket.io] Disconnected from server");
+      setConnected(false);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.off("indicesUpdate");
+      socket.off("connect");
+      socket.off("disconnect");
     };
-
-    fetchIndices();
-
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchIndices, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const formatNumber = (num) => {
@@ -72,6 +88,18 @@ const TopBar = () => {
             </>
           )}
         </div>
+        {/* Connection indicator */}
+        <div
+          title={connected ? "Live • Real-time via WebSocket" : "Disconnected"}
+          style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: connected ? "#27ae60" : "#e74c3c",
+            marginLeft: "12px",
+            flexShrink: 0,
+          }}
+        />
       </div>
 
       <Menu />

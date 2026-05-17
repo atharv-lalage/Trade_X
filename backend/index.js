@@ -1,12 +1,15 @@
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const { Server } = require("socket.io");
 const authRoute = require("./Routes/AuthRoute");
 const YahooFinance = require("yahoo-finance2").default;
 const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+const { validate, orderSchema } = require("./Middlewares/validation");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
@@ -16,6 +19,17 @@ const PORT = process.env.PORT || 3002;
 const uri = process.env.MONGO_URL;
 
 const app = express();
+const server = http.createServer(app);
+
+// ─── Socket.io Setup ────────────────────────────────────────────────────
+
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 app.use(
   cors({
@@ -286,16 +300,13 @@ app.get("/allOrders", async (req, res) => {
   }
 });
 
-// POST buy or sell a stock
-app.post("/newOrder", async (req, res) => {
+// POST buy or sell a stock (validated by Joi middleware)
+app.post("/newOrder", validate(orderSchema), async (req, res) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: "Not authenticated" });
 
+  // req.body is already validated & sanitized by Joi
   const { symbol, name, qty, price, mode } = req.body;
-
-  if (!symbol || !qty || !price || !mode) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
 
   const quantity = Number(qty);
   const orderPrice = Number(price);
@@ -378,20 +389,103 @@ app.post("/newOrder", async (req, res) => {
   }
 });
 
+// ─── Socket.io Real-Time Market Data Broadcasting ──────────────────────
+
+// Default watchlist symbols to broadcast prices for
+const BROADCAST_SYMBOLS = [
+  "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
+  "WIPRO.NS", "ITC.NS", "BHARTIARTL.NS", "SBIN.NS", "LT.NS",
+];
+
+// Fetch and broadcast market data to all connected clients
+const broadcastMarketData = async () => {
+  try {
+    // Fetch indices
+    const [niftyResult, sensexResult] = await Promise.allSettled([
+      yahooFinance.quote("^NSEI"),
+      yahooFinance.quote("^BSESN"),
+    ]);
+
+    const formatIndex = (result, fallbackName) => {
+      if (result.status === "fulfilled" && result.value) {
+        const q = result.value;
+        return {
+          name: q.shortName || fallbackName,
+          price: q.regularMarketPrice,
+          change: q.regularMarketChange,
+          changePercent: q.regularMarketChangePercent,
+          isDown: q.regularMarketChange < 0,
+        };
+      }
+      return { name: fallbackName, price: 0, change: 0, changePercent: 0, isDown: false };
+    };
+
+    io.emit("indicesUpdate", {
+      nifty: formatIndex(niftyResult, "NIFTY 50"),
+      sensex: formatIndex(sensexResult, "SENSEX"),
+    });
+
+    // Fetch watchlist stock prices
+    const quoteResults = await Promise.allSettled(
+      BROADCAST_SYMBOLS.map((s) => yahooFinance.quote(s))
+    );
+
+    const stockPrices = quoteResults
+      .filter((r) => r.status === "fulfilled" && r.value)
+      .map((r) => {
+        const q = r.value;
+        return {
+          symbol: q.symbol,
+          name: q.shortName || q.longName || q.symbol,
+          price: q.regularMarketPrice,
+          change: q.regularMarketChange,
+          changePercent: q.regularMarketChangePercent,
+          high: q.regularMarketDayHigh,
+          low: q.regularMarketDayLow,
+          prevClose: q.regularMarketPreviousClose,
+          volume: q.regularMarketVolume,
+          isDown: q.regularMarketChange < 0,
+        };
+      });
+
+    io.emit("stocksUpdate", stockPrices);
+
+    console.log(`[Socket.io] Broadcasted market data to ${io.engine.clientsCount} client(s)`);
+  } catch (error) {
+    console.error("[Socket.io] Broadcast error:", error.message);
+  }
+};
+
+io.on("connection", (socket) => {
+  console.log(`[Socket.io] Client connected: ${socket.id}`);
+
+  // Send initial data immediately on connection
+  broadcastMarketData();
+
+  socket.on("disconnect", () => {
+    console.log(`[Socket.io] Client disconnected: ${socket.id}`);
+  });
+});
+
+// Broadcast market data every 15 seconds
+setInterval(broadcastMarketData, 15000);
+
 // ─── Server Startup ─────────────────────────────────────────────────────
 
 mongoose
   .connect(uri)
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log("DB connected!");
+      console.log("Socket.io ready for real-time connections");
     });
   })
   .catch((err) => {
     console.error("DB connection error:", err);
     // Start server even without DB for stock API to work
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT} (without DB)`);
+      console.log("Socket.io ready for real-time connections");
     });
   });

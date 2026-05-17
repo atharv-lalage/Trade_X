@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import GeneralContext from "./GeneralContext";
 import { VerticalGraph } from "./VerticalGraph";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const generalContext = useContext(GeneralContext);
 
   useEffect(() => {
     axios
@@ -91,6 +93,7 @@ const Holdings = () => {
                   <th>P&amp;L</th>
                   <th>Net chg.</th>
                   <th>Day chg.</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -111,6 +114,23 @@ const Holdings = () => {
                       <td className={profClass}>{formatCurrency(pnl)}</td>
                       <td className={profClass}>{stock.net}</td>
                       <td className={dayClass}>{stock.day}</td>
+                      <td>
+                        <button
+                          onClick={() => generalContext.openSellWindow(stock.symbol)}
+                          style={{
+                            background: "#e74c3c",
+                            color: "#fff",
+                            border: "none",
+                            padding: "4px 12px",
+                            borderRadius: "3px",
+                            cursor: "pointer",
+                            fontSize: "0.75rem",
+                            fontWeight: 500,
+                          }}
+                        >
+                          Sell
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
