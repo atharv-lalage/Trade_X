@@ -23,12 +23,20 @@ const server = http.createServer(app);
 
 // ─── Socket.io Setup ────────────────────────────────────────────────────
 
+const parseOrigins = (urlStr) => {
+  if (!urlStr) return [];
+  return urlStr
+    .split(",")
+    .map((url) => url.trim().replace(/\/$/, ""))
+    .filter(Boolean);
+};
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
-  process.env.FRONTEND_URL,
-  process.env.DASHBOARD_URL,
-].filter(Boolean);
+  ...parseOrigins(process.env.FRONTEND_URL),
+  ...parseOrigins(process.env.DASHBOARD_URL),
+];
 
 const io = new Server(server, {
   cors: {
