@@ -6,8 +6,9 @@ const Funds = () => {
   const [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      .get("http://localhost:3002/allHoldings", { withCredentials: true })
+      .get(`${apiUrl}/allHoldings`, { withCredentials: true })
       .then((res) => setHoldings(res.data))
       .catch((err) => console.error("Failed to fetch holdings:", err));
   }, []);

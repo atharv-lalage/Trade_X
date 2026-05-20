@@ -12,7 +12,8 @@ const AuthGuard = () => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3002/verify", {
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
+        const { data } = await axios.get(`${apiUrl}/verify`, {
           withCredentials: true,
         });
         if (data.status) {
@@ -120,7 +121,7 @@ const AuthGuard = () => {
             Please login or create an account first.
           </p>
           <a
-            href="http://localhost:3000/signup"
+            href={`${process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}/signup`}
             style={{
               display: "inline-block",
               background: "#4184f3",
@@ -139,7 +140,7 @@ const AuthGuard = () => {
           </a>
           <br />
           <a
-            href="http://localhost:3000"
+            href={process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}
             style={{
               display: "inline-block",
               marginTop: "12px",

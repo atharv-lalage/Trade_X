@@ -3,7 +3,7 @@ import Menu from "./Menu";
 import { io } from "socket.io-client";
 
 // Create a single socket connection (shared across the app)
-const socket = io("http://localhost:3002", {
+const socket = io(process.env.REACT_APP_API_URL || "http://localhost:3002", {
   withCredentials: true,
   transports: ["websocket", "polling"],
 });

@@ -8,8 +8,9 @@ function Navbar() {
 
   useEffect(() => {
     // Verify auth status via cookie (not localStorage)
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      .get("http://localhost:3002/verify", { withCredentials: true })
+      .get(`${apiUrl}/verify`, { withCredentials: true })
       .then((res) => {
         if (res.data.status) {
           setIsLoggedIn(true);
@@ -23,8 +24,9 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
       await axios.post(
-        "http://localhost:3002/logout",
+        `${apiUrl}/logout`,
         {},
         { withCredentials: true }
       );
@@ -92,7 +94,7 @@ function Navbar() {
             <li className="nav-item">
               <a
                 className="nav-link"
-                href="http://localhost:3001"
+                href={process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001"}
                 style={{
                   cursor: "pointer",
                   color: "#4184f3",

@@ -24,8 +24,8 @@ module.exports.Login = async (req, res) => {
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,         // set true in production with HTTPS
-      sameSite: "lax",       // allows cookie to be sent across ports on localhost
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days in ms
       path: "/",
     });
@@ -56,8 +56,8 @@ module.exports.Signup = async (req, res) => {
     const token = createSecretToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 3 * 24 * 60 * 60 * 1000,
       path: "/",
     });
@@ -73,8 +73,8 @@ module.exports.Signup = async (req, res) => {
 module.exports.Logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
   });
   res.status(200).json({ message: "Logged out successfully", success: true });

@@ -24,8 +24,9 @@ const SellActionWindow = ({ uid }) => {
         setStockName(quoteData.name || uid);
 
         // Fetch current holding quantity for this stock
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
         const { data: holdings } = await axios.get(
-          "http://localhost:3002/allHoldings",
+          `${apiUrl}/allHoldings`,
           { withCredentials: true }
         );
         const holding = holdings.find((h) => h.symbol === uid);
@@ -56,8 +57,9 @@ const SellActionWindow = ({ uid }) => {
 
     setOrderStatus("placing");
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
       const { data } = await axios.post(
-        "http://localhost:3002/newOrder",
+        `${apiUrl}/newOrder`,
         {
           symbol: uid,
           name: stockName,

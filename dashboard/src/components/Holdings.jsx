@@ -9,8 +9,9 @@ const Holdings = () => {
   const generalContext = useContext(GeneralContext);
 
   useEffect(() => {
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      .get("http://localhost:3002/allHoldings", { withCredentials: true })
+      .get(`${apiUrl}/allHoldings`, { withCredentials: true })
       .then((res) => {
         setAllHoldings(res.data);
       })

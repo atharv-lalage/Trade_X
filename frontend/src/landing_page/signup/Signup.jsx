@@ -30,8 +30,9 @@ const Signup = ({ onSwitch }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
       const { data } = await axios.post(
-        "http://localhost:3002/signup",
+        `${apiUrl}/signup`,
         { ...inputValue },
         { withCredentials: true }
       );

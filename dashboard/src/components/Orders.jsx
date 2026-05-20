@@ -6,8 +6,9 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      .get("http://localhost:3002/allOrders", { withCredentials: true })
+      .get(`${apiUrl}/allOrders`, { withCredentials: true })
       .then((res) => setOrders(res.data))
       .catch((err) => console.error("Orders fetch error:", err))
       .finally(() => setLoading(false));

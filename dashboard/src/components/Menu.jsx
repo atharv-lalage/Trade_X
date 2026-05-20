@@ -9,8 +9,9 @@ const Menu = () => {
 
   useEffect(() => {
     // Fetch username from auth
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
     axios
-      .get("http://localhost:3002/verify", { withCredentials: true })
+      .get(`${apiUrl}/verify`, { withCredentials: true })
       .then((res) => {
         if (res.data.status) {
           setUsername(res.data.user);
@@ -29,15 +30,16 @@ const Menu = () => {
 
   const handleLogout = async () => {
     try {
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
       await axios.post(
-        "http://localhost:3002/logout",
+        `${apiUrl}/logout`,
         {},
         { withCredentials: true }
       );
     } catch (err) {
       console.error("Logout failed:", err);
     }
-    window.location.href = "http://localhost:3000";
+    window.location.href = process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
   };
 
   const menuClass = "menu";
@@ -124,7 +126,7 @@ const Menu = () => {
 
         {/* Back to TradeX Home */}
         <a
-          href="http://localhost:3000"
+          href={process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}
           className="home-link"
           style={{
             display: "flex",
