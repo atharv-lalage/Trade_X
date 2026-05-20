@@ -120,6 +120,7 @@ Vercel is the best free platform for React applications.
    - **Root Directory**: Edit this and select the `dashboard` folder.
 4. Open **Environment Variables** and add:
    - `REACT_APP_API_URL`: *<Your Render Backend URL>*
+   - `REACT_APP_FRONTEND_URL`: *<Your Vercel Frontend URL>*
 5. Click **Deploy**.
 6. Once deployed, copy the Dashboard URL (e.g., `https://tradex-dashboard.vercel.app`).
 
