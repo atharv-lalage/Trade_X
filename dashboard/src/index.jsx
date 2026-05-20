@@ -121,7 +121,7 @@ const AuthGuard = () => {
             Please login or create an account first.
           </p>
           <a
-            href={`${process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}/signup`}
+            href={`${process.env.REACT_APP_FRONTEND_URL || "https://tradex-home.vercel.app"}/signup`}
             style={{
               display: "inline-block",
               background: "#4184f3",
@@ -140,7 +140,7 @@ const AuthGuard = () => {
           </a>
           <br />
           <a
-            href={process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}
+            href={process.env.REACT_APP_FRONTEND_URL || "https://tradex-home.vercel.app"}
             style={{
               display: "inline-block",
               marginTop: "12px",

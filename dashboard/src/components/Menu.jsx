@@ -39,7 +39,7 @@ const Menu = () => {
     } catch (err) {
       console.error("Logout failed:", err);
     }
-    window.location.href = process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
+    window.location.href = process.env.REACT_APP_FRONTEND_URL || "https://tradex-home.vercel.app";
   };
 
   const menuClass = "menu";
@@ -126,7 +126,7 @@ const Menu = () => {
 
         {/* Back to TradeX Home */}
         <a
-          href={process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000"}
+          href={process.env.REACT_APP_FRONTEND_URL || "https://tradex-home.vercel.app"}
           className="home-link"
           style={{
             display: "flex",
