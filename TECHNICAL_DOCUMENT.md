@@ -114,7 +114,7 @@ Cookie automatically sent with every future request
 - `localStorage` tokens are vulnerable — any injected script can read `localStorage.getItem("token")` and steal the user's session.
 - Cookies with `sameSite: "lax"` work across different ports on localhost, enabling seamless auth between frontend (3000) and dashboard (3001).
 
-**Interview Talking Point:** *"I chose httpOnly cookies over localStorage for JWT storage because localStorage is accessible to any JavaScript running on the page, making it vulnerable to XSS attacks. httpOnly cookies are invisible to client-side JS and are automatically sent with every HTTP request, which also simplifies the code — no need to manually attach tokens to headers."*
+**Design Rationale:** *httpOnly cookies were selected over localStorage for JWT storage because localStorage is accessible to any client-side JavaScript, exposing it to XSS vulnerabilities. httpOnly cookies are hidden from client-side JS and automatically attached to matching cross-origin requests, simplifying authentication header management.*
 
 ---
 
@@ -152,7 +152,7 @@ Backend (Server)                          Dashboard (Client)
 - 15-second update interval, easily configurable.
 - Connection status indicator (green/red dot) shows users the live state.
 
-**Interview Talking Point:** *"I replaced HTTP polling with WebSockets using Socket.io because financial applications need low-latency data delivery. With polling, the client wastes requests asking for data that hasn't changed. With WebSockets, the server pushes updates only when new data is available, reducing bandwidth and improving responsiveness."*
+**Design Rationale:** *HTTP polling was upgraded to WebSockets via Socket.io to meet low-latency data delivery requirements for financial dashboards. Unlike polling, which consumes unnecessary bandwidth checking for unchanged state, WebSockets allow server-driven push updates only when data updates occur.*
 
 ---
 
@@ -247,7 +247,7 @@ The `GeneralContextProvider` wraps the entire dashboard (WatchList + all Routes)
 </GeneralContextProvider>
 ```
 
-**Interview Talking Point:** *"The buy/sell system uses a weighted average cost model, which is the industry standard used by brokers like Zerodha and Groww. The sell feature validates holding quantity on both the client and server side — preventing overselling. I used React's Context API to share the buy/sell modal state across the entire dashboard, allowing users to sell from multiple entry points (watchlist and holdings table)."*
+**Design Rationale:** *The transaction engine employs a weighted average cost accounting model aligned with industry-standard brokerage software. Quantity validation is enforced across both client and server boundaries to block invalid short sales, while React Context manages global execution modal state.*
 
 ---
 
@@ -285,7 +285,7 @@ app.post("/newOrder", validate(orderSchema), async (req, res) => {
 | `password: "ab"` | "Password must be at least 6 characters" |
 | Unknown fields | Automatically stripped (security) |
 
-**Interview Talking Point:** *"I used Joi for input validation because it acts as a single source of truth for what valid data looks like. The validate() middleware factory I wrote is reusable — you define the schema once and apply it to any route with one line. It also uses `stripUnknown: true` to prevent mass-assignment attacks by removing any unexpected fields from the request body."*
+**Design Rationale:** *Joi schema validation acts as a centralized gatekeeper for request integrity. By wrapping validation in a higher-order middleware factory with `stripUnknown: true`, invalid inputs are caught early and mass-assignment payload vulnerabilities are automatically mitigated.*
 
 ---
 
@@ -397,7 +397,7 @@ This also prevents duplicate holdings — a user can only have one holding entry
 
 ---
 
-## 8. Interview Q&A Preparation
+## 8. Technical FAQ & Architectural Trade-offs
 
 **Q: Why did you choose MongoDB over SQL for this project?**
 > Stock portfolios have a flexible schema — different stocks have different attributes. MongoDB's document model lets me store and query user-specific data efficiently. The compound index `{ userId, symbol }` gives me fast lookups for "does this user already hold this stock?" — which is critical for the buy/sell flow.
@@ -420,9 +420,7 @@ This also prevents duplicate holdings — a user can only have one holding entry
 
 ---
 
-## 9. Resume Bullet Points
-
-Use these for your resume's project section:
+## 9. Key Technical Accomplishments
 
 - Built a **full-stack MERN trading platform** with real-time market data integration via Yahoo Finance API, serving live stock quotes and index data for NSE/BSE markets.
 - Implemented **WebSocket-based real-time data delivery** using Socket.io, replacing HTTP polling and reducing client-server data latency by ~50%.

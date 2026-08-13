@@ -2,6 +2,11 @@
 
 TradeX is a modern, full-stack stock trading platform that allows users to manage their portfolios, track real-time stock market data, and execute simulated trades seamlessly.
 
+## 📚 Documentation & System Design
+
+- 📄 [**Full Technical Architecture Document**](./TECHNICAL_DOCUMENT.md) — System architecture, httpOnly JWT security, Socket.io real-time engine, weighted average cost formulas, Joi schema validation, and technical FAQ.
+- 🚀 [**Cloud Deployment Guide**](./DEPLOYMENT_GUIDE.md) — Step-by-step instructions for deploying to Render (Backend) and Vercel (Frontend & Dashboard) with cross-origin cookie setup.
+
 ## 🚀 Features
 
 - **Real-Time Market Data via WebSockets**: Live stock prices and indices (NIFTY 50, SENSEX) pushed to the dashboard in real-time using **Socket.io**, eliminating the need for polling.
