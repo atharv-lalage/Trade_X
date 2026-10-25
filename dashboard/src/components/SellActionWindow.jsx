@@ -12,6 +12,7 @@ const SellActionWindow = ({ uid }) => {
   const [holdingQty, setHoldingQty] = useState(0);
   const [orderStatus, setOrderStatus] = useState(null); // null | 'placing' | 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState("");
+  const [isMockData, setIsMockData] = useState(false);
   const generalContext = useContext(GeneralContext);
 
   // Fetch real price + current holding qty
@@ -22,6 +23,7 @@ const SellActionWindow = ({ uid }) => {
         const quoteData = await getQuote(uid);
         setStockPrice(quoteData.price);
         setStockName(quoteData.name || uid);
+        setIsMockData(quoteData.isMockData || false);
 
         // Fetch current holding quantity for this stock
         const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -172,13 +174,27 @@ const SellActionWindow = ({ uid }) => {
         </div>
       )}
 
+      {isMockData && (
+        <div
+          style={{
+            padding: "8px 20px",
+            background: "#fff3cd",
+            color: "#856404",
+            fontSize: "0.85rem",
+            textAlign: "center",
+          }}
+        >
+          ⚠️ Market data unavailable. Trading temporarily paused.
+        </div>
+      )}
+
       <div className="buttons">
         <span>Estimated return ₹{loading ? "..." : totalValue}</span>
         <div>
           <button
             className="btn btn-orange"
             onClick={handleSellClick}
-            disabled={loading || orderStatus === "placing" || holdingQty === 0}
+            disabled={loading || orderStatus === "placing" || holdingQty === 0 || isMockData}
           >
             {orderStatus === "placing" ? "Placing..." : "Sell"}
           </button>

@@ -68,6 +68,7 @@ const getMockQuote = (symbol) => {
     regularMarketOpen: prevClose * 1.002,
     regularMarketPreviousClose: prevClose,
     regularMarketVolume: Math.floor(Math.random() * 5000000) + 100000,
+    isMockData: true,
   };
 };
 
@@ -77,7 +78,7 @@ const safeGetQuote = async (symbol) => {
     if (!quote || !quote.regularMarketPrice) {
       throw new Error("Invalid quote data from API");
     }
-    return quote;
+    return { ...quote, isMockData: false };
   } catch (error) {
     return getMockQuote(symbol);
   }
@@ -149,6 +150,7 @@ app.get("/api/quote/:symbol", async (req, res) => {
       volume: quote.regularMarketVolume,
       marketCap: quote.marketCap,
       isDown: quote.regularMarketChange < 0,
+      isMockData: quote.isMockData,
     });
   } catch (error) {
     console.error("Quote error:", error.message);
@@ -183,6 +185,7 @@ app.get("/api/quotes", async (req, res) => {
           prevClose: q.regularMarketPreviousClose,
           volume: q.regularMarketVolume,
           isDown: q.regularMarketChange < 0,
+          isMockData: q.isMockData,
         };
       });
 
@@ -401,6 +404,12 @@ app.post("/newOrder", validate(orderSchema), async (req, res) => {
   const orderPrice = Number(price);
 
   try {
+    // Prevent orders if the live market data is unavailable (using mock data)
+    const currentQuote = await safeGetQuote(symbol);
+    if (currentQuote.isMockData) {
+      return res.status(400).json({ error: "Market data unavailable, trading temporarily paused." });
+    }
+
     // Fetch real stock name if not provided
     let stockName = name || symbol;
     if (!name) {
@@ -534,6 +543,7 @@ const broadcastMarketData = async () => {
           prevClose: q.regularMarketPreviousClose,
           volume: q.regularMarketVolume,
           isDown: q.regularMarketChange < 0,
+          isMockData: q.isMockData,
         };
       });
 

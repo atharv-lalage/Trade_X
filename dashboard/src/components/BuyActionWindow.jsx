@@ -11,6 +11,7 @@ const BuyActionWindow = ({ uid }) => {
   const [loading, setLoading] = useState(true);
   const [orderStatus, setOrderStatus] = useState(null); // null | 'placing' | 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState("");
+  const [isMockData, setIsMockData] = useState(false);
   const generalContext = useContext(GeneralContext);
 
   // Fetch real price for the selected stock
@@ -20,6 +21,7 @@ const BuyActionWindow = ({ uid }) => {
         const data = await getQuote(uid);
         setStockPrice(data.price);
         setStockName(data.name || uid);
+        setIsMockData(data.isMockData || false);
       } catch (error) {
         console.error("Failed to fetch stock price:", error);
       } finally {
@@ -136,13 +138,27 @@ const BuyActionWindow = ({ uid }) => {
         </div>
       )}
 
+      {isMockData && (
+        <div
+          style={{
+            padding: "8px 20px",
+            background: "#fff3cd",
+            color: "#856404",
+            fontSize: "0.85rem",
+            textAlign: "center",
+          }}
+        >
+          ⚠️ Market data unavailable. Trading temporarily paused.
+        </div>
+      )}
+
       <div className="buttons">
         <span>Margin required ₹{loading ? "..." : totalValue}</span>
         <div>
           <button
             className="btn btn-blue"
             onClick={handleBuyClick}
-            disabled={loading || orderStatus === "placing"}
+            disabled={loading || orderStatus === "placing" || isMockData}
           >
             {orderStatus === "placing" ? "Placing..." : "Buy"}
           </button>
